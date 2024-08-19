@@ -1,12 +1,13 @@
 defmodule Mix.Tasks.Minamo do
-  @moduledoc "The hello mix task: `mix help hello`"
+  @moduledoc "みなもtask: `mix help minamo`"
   use Mix.Task
 
-  @shortdoc "Simply calls the Hello.say/0 function."
+  @shortdoc "access to claude"
   def run(_) do
+    Mix.Task.run("app.start")
     Application.ensure_all_started(:httpoison)
     Application.ensure_all_started(:poison)
-    Minamo.hello()
-    Minamo.fetch_ghibli_films()
+    #Minamo.claude_talk()
+    Minamo.plamo_talk()
   end
 end

@@ -22,8 +22,7 @@ defmodule Minamo.MixProject do
   defp deps do
     [
       {:httpoison, "~> 2.2"},
-      {:jason, "~> 1.4"},
-      {:anthropic, "~> 0.4.0", hex: :anthropic_community}
+      {:jason, "~> 1.4"}
     ]
   end
 end

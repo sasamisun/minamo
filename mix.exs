@@ -14,7 +14,6 @@ defmodule Minamo.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      applications: [:httpotion],
       extra_applications: [:logger]
     ]
   end
@@ -23,7 +22,8 @@ defmodule Minamo.MixProject do
   defp deps do
     [
       {:httpoison, "~> 2.2"},
-      {:poison, "~> 6.0"}
+      {:jason, "~> 1.4"},
+      {:anthropic, "~> 0.4.0", hex: :anthropic_community}
     ]
   end
 end

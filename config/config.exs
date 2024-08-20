@@ -32,7 +32,11 @@ config :minamo, AnthropicClient,
   top_p: 0.9,
   top_k: 5
 
-  config :minamo, PlamoClient,
+config :minamo, PlamoClient,
   base_url: "https://platform.preferredai.jp",
   api_key: System.get_env("PLAMO_API_KEY", "NjZjMmVhMzc2MDJlMzIzZmY4ZWE5N2ExOjg3a29tRTZZQ2xHMktDbkhYcWlXYklPamJsOXRkR3dL"),
   default_model: "plamo-beta"
+
+config :minamo, StrapiClient,
+  strapi_url: "https://chokhmah.lol/dalet/api",
+  strapi_key: System.get_env("STRAPI_KEY", "02ac256a5129269ae489a51922bdcf3dac64f6d4cf3e789818e1966f5ab57065f44dfc57819cc4657d59624f3b34ec1a63705a045e23da51b5f51f9dc81a75cf266e698b1fe8376386cd2254dab23b40965f4946113fb20e0f99c69bc9294fad071e47adde2626b6d9887a89e1c16fdc8fd71f4f24fffa0eb8cde42338e2472b")

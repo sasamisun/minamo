@@ -30,7 +30,6 @@ defmodule PlamoClient do
       |> Jason.encode!()
 
     url = @config[:base_url] <> "/api/completion/v1/chat/completions"
-    IO.puts(url)
 
     headers = [
       {"Content-Type", "application/json"},

@@ -8,6 +8,6 @@ defmodule Mix.Tasks.Minamo do
     Application.ensure_all_started(:httpoison)
     Application.ensure_all_started(:poison)
     #Minamo.claude_talk()
-    Minamo.plamo_talk()
+    Minamo.start_conversation()
   end
 end

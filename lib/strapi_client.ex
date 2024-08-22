@@ -7,6 +7,14 @@ defmodule StrapiClient do
   require Logger
   @config Application.compile_env(:minamo, __MODULE__, [])
 
+  #共通ヘッダ
+  defp headers do
+    [
+      {"Content-Type", "application/json"},
+      {"Authorization", "Bearer #{@config[:strapi_key]}"}
+    ]
+  end
+
   @doc """
   会話のメッセージをStrapiに保存します。
 
@@ -20,14 +28,10 @@ defmodule StrapiClient do
   def save_message(message) do
     url = @config[:strapi_url] <> "/minamo-histories"
     body = Jason.encode!(%{data: message})
-    headers = [
-      {"Content-Type", "application/json"},
-      {"Authorization", "Bearer #{@config[:strapi_key]}"}
-    ]
 
-    case HTTPoison.post(url, body, headers) do
-      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} when status_code in 200..299 ->
-        {:ok, Jason.decode!(response_body)}
+    case HTTPoison.post(url, body, headers()) do
+      {:ok, %HTTPoison.Response{status_code: status_code}} when status_code in 200..299 ->
+        {:ok}
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
         Logger.error("Failed to save message to Strapi. Status: #{status_code}, Body: #{response_body}")
         {:error, "Failed to save message. Status: #{status_code}"}
@@ -51,7 +55,7 @@ defmodule StrapiClient do
     query_params = "?sort=createdAt:desc&pagination[limit]=#{limit}"
     url = @config[:strapi_url] <> "/minamo-histories" <> query_params
 
-    case HTTPoison.get(url) do
+    case HTTPoison.get(url, headers()) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         messages = Jason.decode!(body)["data"]
         |> Enum.map(fn item ->
@@ -63,7 +67,35 @@ defmodule StrapiClient do
         {:ok, Enum.reverse(messages)}
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
         Logger.error("Failed to get history from Strapi. Status: #{status_code}, Body: #{body}")
-        {:error, "Failed to get history. Status: #{status_code}"}
+        {:error}
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("HTTP request to Strapi failed: #{inspect(reason)}")
+        {:error}
+    end
+  end
+
+
+  @doc """
+  Strapiから特定のIDのプロンプトを取得します。
+
+  ## パラメータ
+    - id: 取得するプロンプトのID
+
+  ## 戻り値
+    - {:ok, prompt} - 成功時。promptは取得したプロンプトの内容
+    - {:error, reason} - エラー時
+  """
+  def get_prompt(id) do
+    url = @config[:strapi_url] <> "/minamo-prompts/#{id}"
+
+    case HTTPoison.get(url,headers()) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        data = Jason.decode!(body)
+        prompt = data["data"]["attributes"]["value"]
+        {:ok, prompt}
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        Logger.error("Failed to get prompt from Strapi. Status: #{status_code}, Body: #{body}")
+        {:error, "Failed to get prompt. Status: #{status_code}"}
       {:error, %HTTPoison.Error{reason: reason}} ->
         Logger.error("HTTP request to Strapi failed: #{inspect(reason)}")
         {:error, "HTTP request failed: #{inspect(reason)}"}

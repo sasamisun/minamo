@@ -41,3 +41,10 @@ config :minamo, StrapiClient,
   strapi_url: "https://chokhmah.lol/dalet/api",
   strapi_key: System.get_env("STRAPI_KEY"),
   default_system_prompt: "あなたは記憶のデータ取得に失敗したAIアシスタントです。何を聞かれてもエラーが起こった旨を50文字以内で伝えてください。"
+
+  config :minamo, TwitterClient,
+  client_id: System.get_env("TWITTER_CLIENT_ID","dTdjbjdpTXpvZnNRYUhfQnBMNzI6MTpjaQ"),
+  client_secret: System.get_env("TWITTER_CLIENT_SECRET","Je3g7zztzawhnzCNQTOI7a8OrEqcIo7DihF1pBN4n3KQQaFsNX"),
+  redirect_uri: "https://chokhmah.lol/",
+  scopes: "tweet.read tweet.write users.read offline.access",
+  dets_file_path: "twitter_tokens.dets"

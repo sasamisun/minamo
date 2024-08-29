@@ -53,12 +53,31 @@ defmodule TwitterClient do
     GenServer.stop(__MODULE__, :normal)
   end
 
+  @doc """
+  ユーザーのメンションタイムラインを取得するぜ。
+  """
+  def get_mentions_timeline do
+    GenServer.call(__MODULE__, :get_mentions_timeline)
+  end
+
   # サーバーコールバック
 
   @impl true
   def init(:ok) do
     Process.flag(:trap_exit, true)
     {:ok, %{}}
+  end
+
+  @impl true
+  def handle_call(:get_mentions_timeline, _from, state) do
+    case get_valid_token() do
+      {:ok, token} ->
+        result = do_get_mentions_timeline(token)
+        {:reply, result, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
   end
 
   @impl true
@@ -132,6 +151,7 @@ defmodule TwitterClient do
     Logger.info("TwitterClient terminating")
     :ok
   end
+
 
   # プライベート関数
 
@@ -210,31 +230,6 @@ defmodule TwitterClient do
     end
   end
 
-  # 実際にツイートを投稿するAPIリクエストを行います。
-  defp do_post_tweet(text, token) do
-    url = "https://api.twitter.com/2/tweets"
-
-    headers = [
-      {"Authorization", "Bearer #{token}"},
-      {"Content-Type", "application/json"}
-    ]
-
-    body = Jason.encode!(%{text: text})
-
-    case HTTPoison.post(url, body, headers) do
-      {:ok, %HTTPoison.Response{status_code: 201, body: response_body}} ->
-        {:ok, Jason.decode!(response_body)}
-
-      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
-        Logger.error("Failed to post tweet. Status: #{status_code}, Body: #{response_body}")
-        {:error, "HTTP Error: #{status_code}"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        Logger.error("Network error while posting tweet: #{inspect(reason)}")
-        {:error, "Network Error: #{reason}"}
-    end
-  end
-
   # PKCE認証に必要なcode_verifierとcode_challengeのペアを生成します。
   defp generate_pkce_pair do
     code_verifier = :crypto.strong_rand_bytes(32) |> Base.url_encode64(padding: false)
@@ -283,5 +278,52 @@ defmodule TwitterClient do
   # トークンの有効期限を計算します。
   defp calculate_expiry(expires_in) do
     DateTime.add(DateTime.utc_now(), expires_in, :second)
+  end
+
+  # 実際にツイートを投稿するAPIリクエストを行います。
+  defp do_post_tweet(text, token) do
+    url = "https://api.twitter.com/2/tweets"
+
+    headers = [
+      {"Authorization", "Bearer #{token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    body = Jason.encode!(%{text: text})
+
+    case HTTPoison.post(url, body, headers) do
+      {:ok, %HTTPoison.Response{status_code: 201, body: response_body}} ->
+        {:ok, Jason.decode!(response_body)}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
+        Logger.error("Failed to post tweet. Status: #{status_code}, Body: #{response_body}")
+        {:error, "HTTP Error: #{status_code}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("Network error while posting tweet: #{inspect(reason)}")
+        {:error, "Network Error: #{reason}"}
+    end
+  end
+
+  #メンションタイムラインを取得
+  defp do_get_mentions_timeline(token) do
+    url = "https://api.twitter.com/2/users/" <> @config[:twitter_id] <> "/mentions"
+    headers = [
+      {"Authorization", "Bearer #{token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    case HTTPoison.get(url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
+        {:ok, Jason.decode!(response_body)}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
+        Logger.error("メンションタイムライン取得に失敗したぜ。ステータス: #{status_code}, ボディ: #{response_body}")
+        {:error, "HTTPエラー: #{status_code}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("メンションタイムライン取得中にネットワークエラーが発生したぜ: #{inspect(reason)}")
+        {:error, "ネットワークエラー: #{reason}"}
+    end
   end
 end

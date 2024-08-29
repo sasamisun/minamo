@@ -16,7 +16,7 @@ end
 defmodule Mix.Tasks.Minamo.Twitter do
   use Mix.Task
 
-  @shortdoc "Authenticate with Twitter and post a tweet"
+  @shortdoc "TwitterのAPIを使ってマスコットAIの操作をするぜ"
   def run(args) do
     Mix.Task.run("app.start")
 
@@ -27,13 +27,14 @@ defmodule Mix.Tasks.Minamo.Twitter do
       ["-d"] ->
         display_stored_tokens()
 
+      ["-m"] ->
+        display_mentions_timeline()
+
       [] ->
         post_tweet()
 
       _ ->
-        IO.puts(
-          "Invalid argument. Use -a for authentication, -d to display stored tokens, or no arguments to post a tweet."
-        )
+        IO.puts("無効な引数だぜ。認証は -a、トークン表示は -d、メンションタイムライン表示は -m を使ってくれ。引数なしだとツイート投稿になるぜ。")
     end
   end
 
@@ -77,12 +78,30 @@ defmodule Mix.Tasks.Minamo.Twitter do
         IO.puts("[Stored Tokens]")
         IO.puts("Access Token: #{tokens.access_token || "Not available"}")
         IO.puts("Refresh Token: #{tokens.refresh_token || "Not available"}")
+
         case tokens.expires_at do
           nil -> IO.puts("Expiry: Not available")
           expires_at -> IO.puts("Expiry: #{expires_at}")
         end
+
       {:error, reason} ->
         IO.puts("Failed to retrieve tokens: #{reason}")
+    end
+  end
+
+  defp display_mentions_timeline do
+    case Minamo.TwitterClientV1.get_mentions_timeline() do
+      {:ok, mentions} ->
+        IO.puts("メンションタイムライン:")
+        Enum.each(mentions, fn tweet ->
+          IO.puts("ID: #{tweet["id_str"]}")
+          IO.puts("ユーザー: @#{tweet["user"]["screen_name"]}")
+          IO.puts("テキスト: #{tweet["text"]}")
+          IO.puts("---")
+        end)
+
+      {:error, reason} ->
+        IO.puts("メンションタイムラインの取得に失敗したぜ: #{reason}")
     end
   end
 end

@@ -1,10 +1,11 @@
 # lib/minamo/application.ex
 defmodule Minamo.Application do
+  alias Minamo.TwitterClientV1
   use Application
 
   def start(_type, _args) do
     children = [
-      # TwitterClientをここに追加
+      TwitterClientV1,
       TwitterClient
     ]
 

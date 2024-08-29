@@ -58,7 +58,7 @@ defmodule Mix.Tasks.Minamo.Twitter do
   end
 
   defp post_tweet do
-    tweet_text = "こんにちは！テスト投稿だぴょ！"
+    tweet_text = "環境をちょっと変えてテスト投稿。"
 
     case TwitterClient.post_tweet(tweet_text) do
       {:ok, response} ->

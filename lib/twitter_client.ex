@@ -89,7 +89,7 @@ defmodule TwitterClient do
         new_tokens = %{
           access_token: tokens["access_token"],
           refresh_token: tokens["refresh_token"],
-          expires_at: calculate_expiry(tokens["expires_at"])
+          expires_at: calculate_expiry(tokens["expires_in"])
         }
 
         case StrapiClient.save_tokens(new_tokens) do
@@ -140,12 +140,15 @@ defmodule TwitterClient do
   defp get_valid_token do
     case StrapiClient.get_tokens() do
       {:ok, %{access_token: token, expires_at: expires_at, refresh_token: refresh_token}} ->
-        # ISO 8601文字列をDateTimeに変換
-        with {:ok, expires_at} <- DateTime.from_iso8601(expires_at),
-             :gt <- DateTime.compare(expires_at, DateTime.utc_now()) do
-          {:ok, token}
-        else
-          _ -> refresh_token(refresh_token)
+        case DateTime.from_iso8601(expires_at) do
+          {:ok, expires_at_datetime, _offset} ->
+            if DateTime.compare(expires_at_datetime, DateTime.utc_now()) == :gt do
+              {:ok, token}
+            else
+              refresh_token(refresh_token)
+            end
+          {:error, _} ->
+            refresh_token(refresh_token)
         end
 
       {:error, reason} ->
@@ -160,11 +163,11 @@ defmodule TwitterClient do
         new_tokens = %{
           access_token: tokens["access_token"],
           refresh_token: tokens["refresh_token"] || refresh_token,
-          expires_at: calculate_expiry(tokens["expires_in"])  # expires_in を expires_at に変更
+          expires_at: calculate_expiry(tokens["expires_in"])
         }
 
         case StrapiClient.save_tokens(new_tokens) do
-          {:ok, saved_tokens} -> {:ok, saved_tokens.access_token}  # 戻り値の形式を修正
+          {:ok, saved_tokens} -> {:ok, saved_tokens.access_token}
           {:error, reason} -> {:error, reason}
         end
 

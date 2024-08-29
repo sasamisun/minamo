@@ -127,9 +127,9 @@ defmodule StrapiClient do
         data = Jason.decode!(body)["data"]
         if data do
           {:ok, %{
-            access_token: data["attributes"]["Access_token"],
-            refresh_token: data["attributes"]["Refresh_token"],
-            expires_at: data["attributes"]["last_creat_at"]
+            access_token: data["attributes"]["access_token"],
+            refresh_token: data["attributes"]["refresh_token"],
+            expires_at: data["attributes"]["expires_at"]
           }}
         else
           {:error, "No tokens found"}
@@ -147,7 +147,7 @@ defmodule StrapiClient do
   Twitter認証トークンをStrapiに保存します。
 
   ## パラメータ
-    - tokens: 保存するトークン（%{access_token: string, refresh_token: string, last_creat_at: DateTime.t()}の形式）
+    - tokens: 保存するトークン（%{access_token: string, refresh_token: string, expires_at: DateTime.t()}の形式）
 
   ## 戻り値
     - {:ok, saved_tokens} - 成功時。saved_tokensは保存されたトークン情報
@@ -158,9 +158,9 @@ defmodule StrapiClient do
 
     body = Jason.encode!(%{
       data: %{
-        Access_token: tokens.access_token,
-        Refresh_token: tokens.refresh_token,
-        last_creat_at: tokens.expires_at
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_at: tokens.expires_at
       }
     })
 
@@ -168,9 +168,9 @@ defmodule StrapiClient do
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} when status_code in 200..299 ->
         saved_data = Jason.decode!(response_body)["data"]
         {:ok, %{
-          access_token: saved_data["attributes"]["Access_token"],
-          refresh_token: saved_data["attributes"]["Refresh_token"],
-          expires_at: saved_data["attributes"]["last_creat_at"]
+          access_token: saved_data["attributes"]["access_token"],
+          refresh_token: saved_data["attributes"]["refresh_token"],
+          expires_at: saved_data["attributes"]["expires_at"]
         }}
       {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
         Logger.error("Failed to save tokens to Strapi. Status: #{status_code}, Body: #{response_body}")

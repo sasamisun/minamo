@@ -22,9 +22,10 @@ defmodule Minamo.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:oauther, "~> 1.1"},
       {:httpoison, "~> 2.2"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:quantum, "~> 3.0"},
+      {:tzdata, "~> 1.1"}
     ]
   end
 end

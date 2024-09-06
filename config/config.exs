@@ -42,15 +42,15 @@ config :minamo, StrapiClient,
   strapi_key: System.get_env("STRAPI_KEY"),
   default_system_prompt: "あなたは記憶のデータ取得に失敗したAIアシスタントです。何を聞かれてもエラーが起こった旨を50文字以内で伝えてください。"
 
-config :minamo, TwitterClient,
+  config :minamo, TwitterClient,
   client_id: System.get_env("TWITTER_CLIENT_ID","dTdjbjdpTXpvZnNRYUhfQnBMNzI6MTpjaQ"),
   client_secret: System.get_env("TWITTER_CLIENT_SECRET","Je3g7zztzawhnzCNQTOI7a8OrEqcIo7DihF1pBN4n3KQQaFsNX"),
   redirect_uri: "https://chokhmah.lol/",
   scopes: "tweet.read tweet.write users.read offline.access",
-  twitter_id: "1404323955159093248"#@minamo_cruel id
+  dets_file_path: "twitter_tokens.dets"
 
- config :minamo, TwitterClientV1,
-  consumer_key:  System.get_env("TWITTER_CONSUMER_KEY","LrjkrDwDVvvQRp6MEKNP2awj8"),
-  consumer_key_secret:  System.get_env("TWITTER_CONSUMER_KEY_SECRET","jI7SlITEEG2R8TRhTx8iCsVm0CbUHBnhWT0VS0EYKyL0g2Y2pU"),
-  access_token:  System.get_env("TWITTER_ACCESS_TOKEN","1404323955159093248-OUymweYKS859S16xQJRB2qY0674kzJ"),
-  access_token_secret:  System.get_env("TWITTER_ACCESS_TOKEN_SECRET","7ev5ZIre0GuzQk8HYRLCt3l2iK92WuDLbeFk6UIHQ2BTv")
+  config :minamo, Minamo.Scheduler,
+  jobs: [
+    {"*/5 * * * *", {Minamo.Scheduler, :testfunc, []}}
+  ],
+  timezone: "Asia/Tokyo"

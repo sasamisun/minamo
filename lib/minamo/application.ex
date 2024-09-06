@@ -1,12 +1,12 @@
 # lib/minamo/application.ex
 defmodule Minamo.Application do
-  alias Minamo.TwitterClientV1
   use Application
 
   def start(_type, _args) do
+    import Supervisor.Spec, warn: false
     children = [
-      TwitterClientV1,
-      TwitterClient
+      TwitterClient,
+      Minamo.Scheduler
     ]
 
     opts = [strategy: :one_for_one, name: Minamo.Supervisor]

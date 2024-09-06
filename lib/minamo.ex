@@ -2,7 +2,19 @@ defmodule Minamo do
   @moduledoc """
   Documentation for `Minamo`.
   """
+  use Application
+
   @config Application.compile_env(:minamo, __MODULE__, [])
+
+  def start(_type, _args) do
+    children = [
+      # This is the new line
+      Minamo.Scheduler
+    ]
+
+    opts = [strategy: :one_for_one, name: Minamo.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
 
   @doc """
     claudeのAPIを使うよ。

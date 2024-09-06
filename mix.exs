@@ -5,7 +5,7 @@ defmodule Minamo.MixProject do
     [
       app: :minamo,
       version: "0.1.0",
-      elixir: "~> 1.17",
+      elixir: "~> 1.17.2",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -22,6 +22,7 @@ defmodule Minamo.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:distillery, "~> 2.0"},
       {:httpoison, "~> 2.2"},
       {:jason, "~> 1.4"},
       {:quantum, "~> 3.0"},

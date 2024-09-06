@@ -19,13 +19,11 @@ defmodule MagicProcessor do
     with {:ok, record} <- StrapiClient.get_oldest_zero_power_record(),
          {:ok, new_spell} <- text_generate(record["attributes"]["comment"]),
          {:ok, _updated_record} <- update_record(record["id"], new_spell) do
-      {:ok, new_spell,record["attributes"]["url"]}
+      {:ok, new_spell, record["attributes"]["url"]}
     else
       {:error, :no_records_found} ->
-        Logger.info("処理すべきレコードが見つかりませんでした。")
-        :ok
+        {:ok, :no_records_found}
       {:error, reason} ->
-        Logger.error("処理中にエラーが発生しました: #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -61,6 +59,7 @@ defmodule MagicProcessor do
       "spell" => new_spell,
       "power" => 1
     }
+
     StrapiClient.update_record(id, params)
   end
 end

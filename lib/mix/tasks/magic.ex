@@ -6,6 +6,8 @@ defmodule Mix.Tasks.Magic do
     mix process_magic
   """
   use Mix.Task
+  require Logger
+
 
   @shortdoc "魔法の処理を実行します"
   def run(_) do
@@ -17,9 +19,13 @@ defmodule Mix.Tasks.Magic do
     case MagicProcessor.process() do
       {:ok, spell, url} ->
         post_tweet(spell <> "\n" <> url)
-        IO.puts("魔法の処理が正常に完了しました。")
+        Logger.info("魔法の処理が正常に完了しました。")
+
+      {:ok, :no_records_found} ->
+        Logger.info("処理すべきレコードが見つかりませんでした。")
+
       {:error, reason} ->
-        IO.puts("エラーが発生しました: #{inspect(reason)}")
+        Logger.info("エラーが発生しました: #{inspect(reason)}")
     end
   end
 

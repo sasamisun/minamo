@@ -2,20 +2,31 @@ defmodule Minamo do
   @moduledoc """
   Documentation for `Minamo`.
   """
-  use Application
-
   @config Application.compile_env(:minamo, __MODULE__, [])
+  require Logger
+  @doc """
+    スケジューラによって起動するよ
+  """
+  def magic_spell() do
+    case MagicProcessor.process() do
+      {:ok, spell, url} ->
 
-  def start(_type, _args) do
-    children = [
-      # This is the new line
-      Minamo.Scheduler
-    ]
 
-    opts = [strategy: :one_for_one, name: Minamo.Supervisor]
-    Supervisor.start_link(children, opts)
+        case TwitterClient.post_tweet(spell <> "\n" <> url) do
+          {:ok, response} ->
+            Logger.info("魔法の処理が正常に完了しました：#{inspect(response)}")
+
+          {:error, reason} ->
+            Logger.info("ポスト時にエラーが発生しました: #{inspect(reason)}")
+        end
+
+      {:ok, :no_records_found} ->
+        Logger.info("処理すべきレコードが見つかりませんでした。")
+
+      {:error, reason} ->
+        Logger.info("strapiから取得時、エラーが発生しました: #{inspect(reason)}")
+    end
   end
-
   @doc """
     claudeのAPIを使うよ。
   """

@@ -22,6 +22,9 @@ defmodule Minamo.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:feeder, "~> 2.3.0"},
+      {:feeder_ex, "~> 1.1"},
+      {:floki, "~> 0.36.2"},
       {:distillery, "~> 2.0"},
       {:httpoison, "~> 2.2"},
       {:jason, "~> 1.4"},

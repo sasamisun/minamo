@@ -255,4 +255,50 @@ defmodule StrapiClient do
         {:error, "Network error: #{inspect(reason)}"}
     end
   end
+
+  @doc """
+  Strapiの/api/minamo-librariesエンドポイントに新しいデータを挿入します。
+
+  ## パラメータ
+    - data: 挿入するデータのマップ。以下のキーを含むことができます：
+      - :subject (文字列)
+      - :status_name (文字列)
+      - :status_value (文字列)
+      - :source (文字列)
+      - :interest (浮動小数点数)
+
+  ## 戻り値
+    - {:ok, inserted_record} - 成功時。inserted_recordは挿入されたレコードの情報
+    - {:error, reason} - エラー時
+  """
+  def insert_library(data) do
+    url = @config[:strapi_url] <> "/minamo-libraries"
+
+    # 有効なフィールドのみをフィルタリング
+    valid_fields = [:subject, :status_name, :status_value, :source, :interest]
+    filtered_data = Map.take(data, valid_fields)
+
+    # interestフィールドが存在する場合、浮動小数点数に変換
+    filtered_data = if Map.has_key?(filtered_data, :interest) do
+      Map.update!(filtered_data, :interest, &(if is_binary(&1), do: String.to_float(&1), else: &1))
+    else
+      filtered_data
+    end
+
+    body = Jason.encode!(%{data: filtered_data})
+
+    case HTTPoison.post(url, body, headers()) do
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} when status_code in 200..299 ->
+        inserted_record = Jason.decode!(response_body)["data"]
+        {:ok, inserted_record}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: response_body}} ->
+        Logger.error("Failed to insert library record to Strapi. Status: #{status_code}, Body: #{response_body}")
+        {:error, "Failed to insert library record. Status: #{status_code}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("HTTP request to Strapi failed: #{inspect(reason)}")
+        {:error, "HTTP request failed: #{inspect(reason)}"}
+    end
+  end
 end

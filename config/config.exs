@@ -57,3 +57,8 @@ config :minamo, Minamo.Scheduler,
     {"*/5 * * * *", {Minamo, :magic_spell, []}}
   ],
   timezone: "Asia/Tokyo"
+
+  config :rss_reader,
+  rss_urls: [
+    "https://www.4gamer.net/rss/index.xml"
+  ]
